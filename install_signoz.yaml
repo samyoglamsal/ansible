@@ -1,0 +1,9 @@
+- name: install signoz
+  hosts: homeservers
+  remote_user: ansible
+
+  tasks:
+    - name: install git
+      ansible.builtin.package:
+        name: git
+        state: present

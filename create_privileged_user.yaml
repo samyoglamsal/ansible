@@ -1,0 +1,32 @@
+---
+- name: create user
+  hosts: homeservers
+  remote_user: admin
+
+  tasks:
+    - name: ensure we have wheel group
+      group:
+        name: wheel
+        state: present
+
+    - name: allow wheel group to have passwordless sudo
+      become: yes
+      ansible.builtin.lineinfile:
+        path: /etc/sudoers
+        state: present
+        regexp: '^%wheel'
+        line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+        validate: 'visudo -cf %s'
+
+    - name: create admin user
+      become: yes
+      become_method: sudo
+      ansible.builtin.user:
+        name: "{{ username }}"
+        comment: user used by ansible
+        group: admin
+        groups: docker,wheel
+        password: "{{ password | ansible.builtin.password_hash }}"
+        generate_ssh_key: true
+
+        

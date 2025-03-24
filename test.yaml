@@ -1,0 +1,13 @@
+---
+- name: test
+  hosts: localhost
+
+  tasks:
+    - name: check pwd
+      ansible.builtin.shell: pwd | cat
+      register: result
+
+    - debug:
+        var: result.stdout
+
+        
