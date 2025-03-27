@@ -4,6 +4,57 @@
 
   tasks:
     - name: install git
+      become: true
       ansible.builtin.package:
         name: git
         state: present
+
+    - name: remove conflicting docker packages
+      become: true
+      ansible.builtin.package:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - docker
+          - docker-client
+          - docker-client-latest 
+          - docker-common 
+          - docker-latest 
+          - docker-latest-logrotate 
+          - docker-logrotate 
+          - docker-selinux 
+          - docker-engine-selinux 
+          - docker-engine
+        state: absent
+
+    - name: install dnf plugins core
+      become: true
+      ansible.builtin.package:
+        name: dnf-plugins-core
+        state: present
+
+    - name: configure dnf plugins core for docker
+      become: true
+      ansible.builtin.command:
+        cmd: dnf-3 config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+
+    - name: install docker engine
+      become: true
+      ansible.builtin.package:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+
+    - name: enable docker daemon
+      become: true
+      ansible.builtin.command:
+        cmd: systemctl enable --now docker
+
+    - name: verify docker installed successfully
+      become: true
+      ansible.builtin.command:
+        cmd: docker run hello-world
